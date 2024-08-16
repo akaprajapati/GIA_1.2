@@ -35,6 +35,11 @@ class SensorDataCreate(BaseModel):
     light: float
     temperature: float
 
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Smart Pot API!"}
+    
 # User registration
 @app.post("/register/")
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
