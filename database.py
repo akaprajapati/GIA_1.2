@@ -1,13 +1,16 @@
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from models import Base
+from config import settings
 
-
-DATABASE_URL = "postgresql://smartpot_user:gia@localhost:5432/smartpot_db"
-
-if not DATABASE_URL:
-    raise ValueError("No DATABASE_URL environment variable found.")
-
-engine = create_engine(DATABASE_URL)
+# Create the SQLAlchemy engine using the database URL from the settings
+engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base.metadata.create_all(bind=engine)
+Base = declarative_base()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
