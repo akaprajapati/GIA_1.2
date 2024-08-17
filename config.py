@@ -1,10 +1,8 @@
-from pydantic_settings import BaseSettings
+import os
 
-class Settings(BaseSettings):
-    database_url: str
+class Settings:
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:gia_smart@localhost:5432/postgres")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "secretkeyexample")
+    ALGORITHM: str = "HS256"
 
-    class Config:
-        env_file = ".env"  # This tells pydantic to load variables from a .env file
-
-# Load the settings
 settings = Settings()
