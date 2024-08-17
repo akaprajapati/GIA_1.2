@@ -4,10 +4,12 @@ from pydantic import BaseModel
 from auth import get_current_user_id,hash_password,verify_password,create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 import models
-from database import SessionLocal, engine
+from database import SessionLocal, engine, Base
 
 
 app = FastAPI()
+
+Base.metadata.create_all(bind=engine)
 
 # Dependency to get the DB session
 def get_db():
@@ -36,23 +38,9 @@ class SensorDataCreate(BaseModel):
     temperature: float
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Smart Pot API!"}
-
-@app.get("/test-db")
-def test_db_connection(db: Session = Depends(get_db)):
-    try:
-        # Execute a simple query to test the connection
-        result = db.execute("SELECT 1")
-        return {"message": "Database connection successful!"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
-
-    
 # User registration
 @app.post("/register/")
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     # Hash the password and create the user
     password_hash = hash_password(user.password)
     db_user = models.User(username=user.username, email=user.email, password_hash=password_hash)  # Update to use password_hash
@@ -60,6 +48,20 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     return {"message": "User registered successfully"}
+
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the Smart Pot API!"}
+
+@app.get("/test-db")
+async def test_db_connection(db: Session = Depends(get_db)):
+    try:
+        # Execute a simple query to test the connection
+        users=db.query(users).limit(1).all()
+        return {"message": "Database connection successful", "users_count": len(users)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+
 
 # Login endpoint to authenticate the user and return a token
 @app.post("/token/")
