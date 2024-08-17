@@ -38,6 +38,10 @@ class SensorDataCreate(BaseModel):
     temperature: float
 
 
+@app.on_event("startup")
+def startup_event():
+    create_tables()  
+
 # User registration
 @app.post("/register/")
 async def register_user(user: UserCreate, db: Session = Depends(get_db)):
