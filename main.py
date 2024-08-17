@@ -4,8 +4,7 @@ from pydantic import BaseModel
 from auth import get_current_user_id,hash_password,verify_password,create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
 import models
-from database import SessionLocal, engine, Base
-
+from database import SessionLocal, engine, Base, create_tables, create_engine
 
 app = FastAPI()
 
@@ -18,6 +17,12 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# Ensure that the tables are created at startup
+@app.on_event("startup")
+def startup_event():
+    create_tables()  # Create tables if they don't exist
 
 # Pydantic models for request validation
 class UserCreate(BaseModel):
@@ -37,10 +42,6 @@ class SensorDataCreate(BaseModel):
     light: float
     temperature: float
 
-
-@app.on_event("startup")
-def startup_event():
-    create_tables()  
 
 # User registration
 @app.post("/register/")
