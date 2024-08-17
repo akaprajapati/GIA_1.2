@@ -16,3 +16,9 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# Function to create tables if they don't exist
+def create_tables():
+    from .models import User, Pot, Plant, SensorData  # Import all your models here
+    Base.metadata.create_all(bind=engine)
