@@ -41,7 +41,7 @@ def read_root():
     return {"message": "Welcome to the Smart Pot API!"}
 
 @app.get("/test-db")
-def test_db_connection(db: Session = Depends(database.get_db)):
+def test_db_connection(db: Session = Depends(get_db)):
     try:
         # Execute a simple query to test the connection
         result = db.execute("SELECT 1")
