@@ -2,6 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
+from models import User, Pot, Plant, SensorData
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
@@ -17,8 +18,6 @@ def get_db():
     finally:
         db.close()
 
-
 # Function to create tables if they don't exist
 def create_tables():
-    from .models import User, Pot, Plant, SensorData  # Import all your models here
     Base.metadata.create_all(bind=engine)
