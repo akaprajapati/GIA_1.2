@@ -39,6 +39,16 @@ class SensorDataCreate(BaseModel):
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Smart Pot API!"}
+
+@app.get("/test-db")
+def test_db_connection(db: Session = Depends(database.get_db)):
+    try:
+        # Execute a simple query to test the connection
+        result = db.execute("SELECT 1")
+        return {"message": "Database connection successful!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+
     
 # User registration
 @app.post("/register/")
