@@ -1,9 +1,13 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import List
+from uuid import UUID
 from auth import get_current_user_id,hash_password,verify_password,create_access_token
 from fastapi.security import OAuth2PasswordRequestForm
+from models import SensorData
 import models
+from datetime import datetime
 from database import SessionLocal, engine, Base, create_tables, create_engine
 
 app = FastAPI()
@@ -41,6 +45,18 @@ class SensorDataCreate(BaseModel):
     moisture: float
     light: float
     temperature: float
+
+
+# Pydantic models for response serialization
+class SensorDataSchema(BaseModel):
+    plant_id: UUID
+    moisture: float
+    light: float
+    temperature: float
+    timestamp: datetime
+
+    class Config:
+        from_attributes = True    
 
 
 # User registration
@@ -133,7 +149,9 @@ def get_plant_by_id(plant_id: str, db: Session = Depends(get_db)):
     return plant
 
 
-@app.get("/sensordata", response_model=list)
+
+# sensordata endpoint
+@app.get("/sensordata", response_model=List[SensorDataSchema])
 def get_sensor_data(
     plant_id: str = Query(None, description="Filter by plant ID"),
     db: Session = Depends(get_db),
@@ -141,13 +159,12 @@ def get_sensor_data(
 ):
     if plant_id:
         # Get sensor data for a specific plant
-        sensor_data = db.query(SensorData).filter(SensorData.plant_id == plant_id).all()
+        sensor_data = db.query(models.SensorData).filter(models.SensorData.plant_id == plant_id).all()
         if not sensor_data:
             raise HTTPException(status_code=404, detail="No sensor data found for the given plant ID")
     else:
         # Get all sensor data
-        sensor_data = db.query(SensorData).all()
+        sensor_data = db.query(models.SensorData).all()
 
-    return sensor_data
-
-
+    # Convert the SQLAlchemy objects to Pydantic models
+    return [SensorDataSchema.from_orm(data) for data in sensor_data]
