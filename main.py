@@ -132,3 +132,22 @@ def get_plant_by_id(plant_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Plant with ID '{plant_id}' not found.")
     return plant
 
+
+@app.get("/sensordata", response_model=list)
+def get_sensor_data(
+    plant_id: str = Query(None, description="Filter by plant ID"),
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user_id)
+):
+    if plant_id:
+        # Get sensor data for a specific plant
+        sensor_data = db.query(SensorData).filter(SensorData.plant_id == plant_id).all()
+        if not sensor_data:
+            raise HTTPException(status_code=404, detail="No sensor data found for the given plant ID")
+    else:
+        # Get all sensor data
+        sensor_data = db.query(SensorData).all()
+
+    return sensor_data
+
+
