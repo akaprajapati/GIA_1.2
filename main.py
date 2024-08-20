@@ -58,15 +58,6 @@ async def register_user(user: UserCreate, db: Session = Depends(get_db)):
 async def read_root():
     return {"message": "Welcome to the Smart Pot API!"}
 
-@app.get("/test-db")
-async def test_db_connection(db: Session = Depends(get_db)):
-    try:
-        # Execute a simple query to test the connection
-        users=db.query(users).limit(1).all()
-        return {"message": "Database connection successful", "users_count": len(users)}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
-
 
 # Login endpoint to authenticate the user and return a token
 @app.post("/token/")
