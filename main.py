@@ -53,7 +53,7 @@ class SensorDataSchema(BaseModel):
     moisture: float
     light: float
     temperature: float
-    timestamp: datetime.utcnow
+    timestamp: datetime
 
     class Config:
         from_attributes = True    
